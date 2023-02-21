@@ -7,51 +7,32 @@ import throttle from 'lodash.throttle';
 
 const STORAGE_KEY = 'feedback-form-state';
 const formEl = document.querySelector('.feedback-form');
-const formData = {
-  email: formEl.email.value,
-  message: formEl.message.value,
-};
+let formData;
 formEl.addEventListener('input', throttle(onFormInput, 500));
-const email = document.querySelector('.feedback-form input');
-const message = document.querySelector('.feedback-form textarea');
-
 formEl.addEventListener('submit', onFormSubmit);
-formEl.addEventListener('input', onFormInput);
-getDataFromStorage();
-function getDataFromStorage(key) {
-  JSON.parse(localStorage.getItem(key));
-}
+
 getValuesBack();
 function getValuesBack(form) {
-  const savedValues = localStorage.getItem(STORAGE_KEY);
+  let savedValues = localStorage.getItem(STORAGE_KEY);
 
-  if (localStorage.getItem(formData)) {
-    const formData = JSON.parse(localStorage.getItem(formData));
-  }
-  for (const key in formData) {
-    formEl.elements[key].value = formData[key];
+  if (savedValues) {
+    savedValues = JSON.parse(savedValues);
+    console.log(savedValues);
+    Object.entries(savedValues).forEach(([key, value]) => {
+      formEl.elements[key].value = value;
+    });
   }
 }
-
 function onFormInput(event) {
-  formData[event.target.name] = event.target.value;
+  let formData = localStorage.getItem(STORAGE_KEY);
+  formData = formData ? JSON.parse(formData) : {};
+  formData[event.target.name] = event.target.value.trim();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
-  console.log(formData);
-  console.log(`Email: ${email.value}, Message: ${message.value}`);
 }
 
 function onFormSubmit(event) {
   event.preventDefault();
   event.currentTarget.reset();
   localStorage.removeItem(STORAGE_KEY);
-}
-
-restoreUserData();
-function restoreUserData() {
-  let savedUserData = JSON.parse(localStorage.getItem(STORAGE_KEY));
-  if (savedUserData) {
-    Object.entries(savedUserData).forEach(([key, value]) => {
-      formEl.elements[key].value = value;
-    });
-  }
+  console.log(formData);
 }
